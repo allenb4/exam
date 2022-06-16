@@ -13,6 +13,7 @@ import {
   Grid,
   makeStyles,
   CircularProgress,
+  Box,
 } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
@@ -27,6 +28,14 @@ const useStyles = makeStyles((theme) => ({
     margin: 14,
   },
   name: {
+    fontWeight: "bold",
+  },
+  topCommentCard: {
+    width: "50%",
+    margin: "auto",
+  },
+  countSize: {
+    fontSize: 24,
     fontWeight: "bold",
   },
 }));
@@ -51,12 +60,14 @@ const stringToColor = (string) => {
 };
 
 const stringAvatar = (name) => {
-  return {
-    children: `${name.split(" ")[0][0]}${name.split(" ")[1][0]}`,
-    sx: {
-      bgcolor: stringToColor(name),
-    },
-  };
+  if (name !== undefined || name !== null) {
+    return {
+      children: `${name.split(" ")[0][0]}${name.split(" ")[1][0]}`,
+      sx: {
+        bgcolor: stringToColor(name),
+      },
+    };
+  }
 };
 
 function App() {
@@ -80,6 +91,27 @@ function App() {
     fetchData();
   }, [dispatch]);
 
+  const count = {};
+  if (comments !== null) {
+    comments.forEach((element) => {
+      count[element.name] = (count[element.name] || 0) + 1;
+    });
+  }
+  var result = Object.keys(count).map((key) => {
+    const data = { name: key, count: count[key] };
+    return data;
+  });
+
+  result.sort((a, b) => {
+    if (a.name !== undefined && b.name !== undefined) {
+      const data = a.count < b.count ? 1 : a.count > b.count ? -1 : 0;
+
+      return data;
+    }
+  });
+
+  let topList = result.slice(0, 3);
+
   return (
     <>
       <Header />
@@ -91,6 +123,64 @@ function App() {
       </div>
 
       <div className={classes.commentCard}>
+        <h1>TOP COMMENTORS:</h1>
+      </div>
+      {topList?.map((item) => {
+        return (
+          item.name !== undefined && (
+            <div className={classes.topCommentCard}>
+              <Paper
+                sx={{
+                  p: 2,
+                  margin: "auto",
+                  maxWidth: 500,
+                  flexGrow: 1,
+                  backgroundColor: (theme) =>
+                    theme.palette.mode === "dark" ? "#1A2027" : "#fff",
+                }}
+              >
+                <Grid container spacing={2} className={classes.commentItems}>
+                  <Grid item>
+                    <ButtonBase sx={{ width: 128, height: 128 }}>
+                      {item?.name ? (
+                        <Avatar
+                          className={classes.avatar}
+                          {...stringAvatar(item?.name)}
+                        />
+                      ) : (
+                        <Avatar className={classes.avatar} />
+                      )}
+                    </ButtonBase>
+                  </Grid>
+                  <Grid item xs={12} sm container>
+                    <Grid item xs container direction="column" spacing={2}>
+                      <Grid item xs>
+                        <Typography
+                          className={classes.countSize}
+                          gutterBottom
+                          variant="subtitle1"
+                          component="div"
+                        >
+                          {item?.name}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          className={classes.countSize}
+                          gutterBottom
+                        >
+                          Comments: {item?.count}
+                        </Typography>
+                      </Grid>
+                      <Grid item></Grid>
+                    </Grid>
+                  </Grid>
+                </Grid>
+              </Paper>
+            </div>
+          )
+        );
+      })}
+      <div className={classes.commentCard}>
         <h1>COMMENT SECTION:</h1>
       </div>
 
@@ -98,66 +188,61 @@ function App() {
         comments
           ?.map((item) => {
             return (
-              <div className={classes.commentCard}>
-                <Paper
-                  sx={{
-                    p: 2,
-                    margin: "auto",
-                    maxWidth: 500,
-                    flexGrow: 1,
-                    backgroundColor: (theme) =>
-                      theme.palette.mode === "dark" ? "#1A2027" : "#fff",
-                  }}
-                >
-                  <Grid
-                    container
-                    spacing={2}
-                    className={classes.commentItems}
-                    key={item?.id}
+              item.name !== undefined && (
+                <div className={classes.commentCard}>
+                  <Paper
+                    sx={{
+                      p: 2,
+                      margin: "auto",
+                      maxWidth: 500,
+                      flexGrow: 1,
+                      backgroundColor: (theme) =>
+                        theme.palette.mode === "dark" ? "#1A2027" : "#fff",
+                    }}
                   >
-                    <Grid item>
-                      <ButtonBase sx={{ width: 128, height: 128 }}>
-                        {item?.name ? (
-                          <Avatar
-                            className={classes.avatar}
-                            {...stringAvatar(item?.name)}
-                          />
-                        ) : (
-                          <Avatar className={classes.avatar} />
-                        )}
-                      </ButtonBase>
-                    </Grid>
-                    <Grid item xs={12} sm container>
-                      <Grid item xs container direction="column" spacing={2}>
-                        <Grid item xs>
-                          <Typography
-                            className={classes.name}
-                            gutterBottom
-                            variant="subtitle1"
-                            component="div"
-                          >
-                            {item?.name}
-                          </Typography>
-                          <Typography variant="body2" gutterBottom>
-                            {item?.body}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {item?.email}
-                          </Typography>
-                        </Grid>
-                        <Grid item>
-                          <Typography
-                            sx={{ cursor: "pointer" }}
-                            variant="body2"
-                          >
-                            {/* Remove */}
-                          </Typography>
+                    <Grid
+                      container
+                      spacing={2}
+                      className={classes.commentItems}
+                      key={item?.id}
+                    >
+                      <Grid item>
+                        <ButtonBase sx={{ width: 128, height: 128 }}>
+                          {item?.name ? (
+                            <Avatar
+                              className={classes.avatar}
+                              {...stringAvatar(item?.name)}
+                            />
+                          ) : (
+                            <Avatar className={classes.avatar} />
+                          )}
+                        </ButtonBase>
+                      </Grid>
+                      <Grid item xs={12} sm container>
+                        <Grid item xs container direction="column" spacing={2}>
+                          <Grid item xs>
+                            <Typography
+                              className={classes.name}
+                              gutterBottom
+                              variant="subtitle1"
+                              component="div"
+                            >
+                              {item?.name}
+                            </Typography>
+                            <Typography variant="body2" gutterBottom>
+                              {item?.body}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {item?.email}
+                            </Typography>
+                          </Grid>
+                          <Grid item></Grid>
                         </Grid>
                       </Grid>
                     </Grid>
-                  </Grid>
-                </Paper>
-              </div>
+                  </Paper>
+                </div>
+              )
             );
           })
           .reverse()

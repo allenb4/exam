@@ -10,7 +10,7 @@ const commentSlice = createSlice({
   initialState,
   reducers: {
     addComment(state, action) {
-      if (state.commentDatas !== null) {
+      if (state.commentDatas !== null && state.commentDatas !== "") {
         state.commentDatas.push(action.payload);
       } else {
         state.commentDatas = action.payload;
